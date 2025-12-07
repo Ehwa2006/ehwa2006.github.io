@@ -76,33 +76,39 @@ const modalClose = $('#modalClose');
 function openProjectModal(card){
   const title = card.dataset.title || card.querySelector('h4')?.innerText;
   const desc = card.dataset.desc || card.querySelector('p')?.innerText;
-  const images = (card.dataset.images || '').split(',').map(s=>s.trim()).filter(Boolean);
+  const items = (card.dataset.images || '').split(',').map(s=>s.trim()).filter(Boolean);
+
   modalTitle.textContent = title;
   modalDesc.textContent = desc;
-  modalSlider.innerHTML = ''; // 비우기
-  if(images.length){
-    images.forEach(src => {
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = title;
-      modalSlider.appendChild(img);
+  modalSlider.innerHTML = ''; // 초기화
+
+  if(items.length){
+    items.forEach(src => {
+      const ext = src.split('.').pop().toLowerCase(); // 확장자 추출
+
+      if(["mp4","webm","ogg"].includes(ext)){       // 🔥 영상일 때
+        const video = document.createElement('video');
+        video.src = src;
+        video.controls = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.style.width = '100%';
+        modalSlider.appendChild(video);
+      }
+      else{                                        // 🔥 이미지일 때
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = title;
+        modalSlider.appendChild(img);
+      }
     });
   } else {
-    modalSlider.textContent = '이미지 없음';
+    modalSlider.textContent = '미디어 없음';
   }
+
   modal.setAttribute('aria-hidden', 'false');
 }
 
-$$('.open-modal').forEach(btn => {
-  btn.addEventListener('click', (e)=>{
-    const card = e.target.closest('.project-card');
-    openProjectModal(card);
-  });
-});
-modalClose.addEventListener('click', ()=> modal.setAttribute('aria-hidden','true'));
-modal.addEventListener('click', (e)=>{
-  if(e.target === modal) modal.setAttribute('aria-hidden','true');
-});
 
 /* ---------- 간단한 타이핑 이펙트 (다국어 토글 지원) ---------- */
 const typingEl = document.querySelector('.typing');
@@ -127,32 +133,41 @@ langToggle.addEventListener('click', (e)=>{
 startTyping();
 
 /* ---------- 폼 전송 (Formspree 예시) ---------- */
+/* ---------- 폼 전송 (Formspree) ---------- */
 const form = $('#contactForm');
 const formStatus = $('#formStatus');
+
 if(form){
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
     formStatus.textContent = '전송중...';
-    const data = new FormData(form);
-    try{
-      const resp = await fetch(form.action, {method: form.method, body: data, headers:{'Accept':'application/json'}});
-      const j = await resp.json();
-      if(resp.ok){ formStatus.textContent = '전송 완료. 감사합니다!'; form.reset(); }
-      if (resp.ok) {
-  formStatus.textContent = '전송 완료. 감사합니다!';
-  form.reset();
-} else {
-  formStatus.textContent = j.errors
-    ? j.errors.map(e => e.message).join(', ')
-    : '전송 실패';
-}
 
-    }catch(err){
+    try{
+      const data = new FormData(form);
+      const resp = await fetch(form.action, {
+        method: form.method,
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      const result = await resp.json();
+
+      if(resp.ok){
+        formStatus.textContent = '전송 완료! 감사합니다😊';
+        form.reset();
+      } else {
+        formStatus.textContent = result.errors
+          ? result.errors.map(e => e.message).join(', ')
+          : '전송 실패';
+      }
+
+    } catch(err){
       console.error(err);
-      formStatus.textContent = '서버 에러: 전송 실패';
+      formStatus.textContent = '서버 오류로 전송 실패';
     }
   });
 }
+
 
 /* ---------- 방문자 카운트 (간단 로컬 스토리지 기반) ---------- */
 const visitsKey = 'pf_visits';
@@ -177,3 +192,16 @@ function track(event, data = {}) {
 /* ---------- 초기화 로그 ---------- */
 console.info('Portfolio script initialized');
 
+/* ---------- 프로젝트 카드 모달 열기 이벤트 연결 ---------- */
+$$('.open-modal').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.project-card');
+    if(card) openProjectModal(card);
+  });
+});
+
+/* 모달 닫기 */
+modalClose.addEventListener('click', ()=> modal.setAttribute('aria-hidden','true'));
+modal.addEventListener('click', (e)=>{
+  if(e.target === modal) modal.setAttribute('aria-hidden','true'); // 바깥 클릭 닫기
+});
