@@ -205,3 +205,114 @@ modalClose.addEventListener('click', ()=> modal.setAttribute('aria-hidden','true
 modal.addEventListener('click', (e)=>{
   if(e.target === modal) modal.setAttribute('aria-hidden','true'); // 바깥 클릭 닫기
 });
+// 모달 열릴 때 스크롤 잠금
+function openProjectModal(card) {
+  modalTitle.textContent = card.dataset.title;
+  modalDesc.textContent = card.dataset.desc;
+  modalSlider.innerHTML = "";
+
+  const files = card.dataset.images.split(',');
+  files.forEach(file => {
+    if(file.trim().endsWith(".mp4")){
+      modalSlider.innerHTML += `<video src="${file.trim()}" controls autoplay></video>`;
+    } else {
+      modalSlider.innerHTML += `<img src="${file.trim()}" alt="">`;
+    }
+  });
+
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = "hidden";   // 스크롤 방지
+}
+
+// 닫으면 스크롤 복구
+modalClose.addEventListener('click', ()=> {
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow = "";
+});
+modal.addEventListener('click', e=>{
+  if(e.target === modal){
+    modal.setAttribute('aria-hidden','true');
+    document.body.style.overflow = "";
+  }
+});
+let slideIndex = 0;
+
+function showSlide(n){
+  const slides = document.querySelectorAll('#modalSlider .slide-item');
+  if(slides.length === 0) return;
+
+  slideIndex = (n + slides.length) % slides.length;
+
+  slides.forEach(s => s.classList.remove('active'));
+  slides[slideIndex].classList.add('active');
+}
+
+function openProjectModal(card){
+  modalTitle.textContent = card.dataset.title;
+  modalDesc.textContent = card.dataset.desc;
+
+  const files = card.dataset.images.split(',');
+  modalSlider.innerHTML = "";  // 초기화
+
+  files.forEach((file,i)=>{
+    const ext = file.trim().split('.').pop();
+
+    const wrap = document.createElement('div');
+    wrap.classList.add('slide-item');
+    if(i === 0) wrap.classList.add('active'); // 첫 화면
+
+    if(["mp4","webm","ogg"].includes(ext)){
+      wrap.innerHTML = `<video src="${file.trim()}" controls autoplay loop></video>`;
+    } else {
+      wrap.innerHTML = `<img src="${file.trim()}" alt="" />`;
+    }
+    modalSlider.appendChild(wrap);
+  });
+
+  slideIndex = 0;
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = "hidden";
+}
+
+// 버튼 이벤트
+$('#slidePrev').addEventListener('click', ()=> showSlide(slideIndex - 1));
+$('#slideNext').addEventListener('click', ()=> showSlide(slideIndex + 1));
+
+
+async function loadSerpBg(){
+  const KEY = "5a3d1fa38905880650b9c46f87a5a2fe0df13e7551b0e82a2b0d3f0566e25e45"; // 🔥 본인 키 입력
+  const q = "게임";
+  const url = `https://serpapi.com/search.json?q=${encodeURIComponent(q)}&tbm=isch&num=100&api_key=${KEY}`;
+
+  try {
+    let res = await fetch(url);
+    let data = await res.json();
+
+    let imgs = data.images_results?.map(i => 
+      i.original || i.thumbnail || i.source || i.link
+    ).filter(u => u && u.startsWith("https"));
+
+    console.log("📌 필터링 후 이미지 수:", imgs.length);
+
+    if(!imgs.length) return console.warn("❌ 사용 가능한 이미지 없음");
+
+    let pick = imgs[Math.floor(Math.random()*imgs.length)];
+    console.log("🎯 선택된 이미지:", pick);
+
+    let bg=document.querySelector(".dynamic-bg");
+    if(!bg){
+      bg=document.createElement("div");
+      bg.className="dynamic-bg";
+      document.body.appendChild(bg);
+    }
+
+    bg.style.backgroundImage = `url("${pick}")`;
+    bg.style.opacity="0.65";
+    setTimeout(()=> bg.style.opacity="0.28",600);
+
+  }catch(e){
+    console.error("⚠ 이미지 로드 실패:",e);
+  }
+}
+
+window.addEventListener("load", loadSerpBg);

@@ -57,7 +57,12 @@ body.light .nav-list a:hover{background:rgba(0,0,0,0.04)}
 .project-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:16px}
 .project-card{background:var(--card);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03);overflow:hidden;display:flex;flex-direction:column;gap:10px;transition:transform .2s, box-shadow .2s}
 .project-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
-.thumb{width:100%;height:140px;border-radius:10px;background-size:cover;background-position:center}
+.thumb{
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat; /* 혹시 모를 반복 방지 */
+}
+
 .card-actions{display:flex;gap:8px;margin-top:auto;align-items:center}
 
 /* 스킬 */
@@ -105,3 +110,133 @@ a:focus,button:focus,input:focus,textarea:focus{outline:3px solid rgba(0,198,255
 
 /* 간단한 유틸 */
 .hidden{display:none}
+
+/* =====✨ Modal Glass Style Upgrade ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: .3s ease;
+  z-index: 999;
+}
+
+.modal[aria-hidden="false"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  width: min(750px, 90%);
+  max-height: 85vh;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.25);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 30px;
+  color: #fff;
+  overflow-y: auto;
+  transform: scale(.85);
+  opacity: 0;
+  animation: modalPop .35s ease forwards;
+  box-shadow: 0 10px 40px rgba(0,0,0,.4);
+}
+
+@keyframes modalPop {
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-content h4 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.modal-content p { 
+  opacity: .95;
+  margin-bottom: 15px;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+/* Close Button */
+.modal-close {
+  position: absolute;
+  top: 18px; right: 18px;
+  background: rgba(255,255,255,.15);
+  border-radius: 50%;
+  width: 38px; height: 38px;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  transition: .2s;
+}
+.modal-close:hover { background: rgba(255,255,255,.3); }
+
+/* Slider Layout */
+.slider {
+  margin-top: 15px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.slider video,
+.slider img {
+  width: 100%;
+  display: block;
+  border-radius: 14px;
+}
+
+/* Scrollbar UI 개선 */
+.modal-content::-webkit-scrollbar { width: 6px; }
+.modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.35);
+  border-radius: 6px;
+}
+/* ===== Slider Buttons ===== */
+.slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,.15);
+  border: none;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-weight: bold;
+  transition: .25s;
+  z-index: 10;
+}
+.slide-btn:hover { background: rgba(255,255,255,.35); }
+
+.slide-btn.prev { left: 12px; }
+.slide-btn.next { right: 12px; }
+
+/* 슬라이드 효과 */
+.slide-item {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  transition: opacity .4s ease;
+}
+.slide-item.active { opacity: 1; position: relative; }
+
+.dynamic-bg {
+  position: fixed;
+  top:0; left:0;
+  width:100vw; height:100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.25;
+  z-index:-1;
+  transition: opacity .6s;
+}
