@@ -280,74 +280,66 @@ $('#slideNext').addEventListener('click', ()=> showSlide(slideIndex + 1));
 
 
 async function loadSerpBg(){
-  // If running on github.io (static), avoid CORS by using Unsplash Source (no server required)
-  if(location.hostname && (location.hostname.endsWith('github.io') || location.hostname === 'ehwa2006.github.io')){
-    const unsplash = `https://source.unsplash.com/random/1600x900/?game&sig=${Date.now()}`;
-    let bg=document.querySelector(".dynamic-bg");
-    if(!bg){
-      bg=document.createElement("div");
-      bg.className="dynamic-bg";
-      document.body.appendChild(bg);
-    }
-    bg.style.backgroundImage = `url("${unsplash}")`;
-    bg.style.opacity = "0.65";
-    setTimeout(()=> bg.style.opacity="0.28",600);
-    console.log("✅ Using Unsplash Source for GitHub Pages:", unsplash);
-    return;
-  }
+  const proxyUrl = "http://localhost:3000/api/game-images";
+  const unsplash = `https://source.unsplash.com/random/1600x900/?game&sig=${Date.now()}`;
 
-  // 서버사이드 프록시 사용 (로컬 개발용, CORS 회피)
-  const url = "http://localhost:3000/api/game-images";
+  // 짧은 타임아웃으로 로컬 프록시를 시도하고 실패하면 Unsplash로 폴백
+  const timeoutMs = 2000;
+  const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
 
   try {
-    let res = await fetch(url);
-    let data = await res.json();
+    const res = await Promise.race([fetch(proxyUrl), timeout(timeoutMs)]);
+    if(!res || !res.ok) throw new Error('proxy fetch failed');
 
-    console.log("🔍 API 응답:", data);
+    const data = await res.json();
+    console.log('✅ 프록시 응답 수신');
+    console.log('🔍 API 응답:', data);
 
-    let imgs = data.images_results?.map(i => {
-      const candidate = i.original || i.thumbnail;
-      if(candidate && candidate.startsWith("https")) return candidate;
-      return null;
-    }).filter(Boolean);
+    let imgs = data.images_results?.map(i => i.original || i.thumbnail || i.source || i.link)
+      .filter(u => u && (u.startsWith('http') || u.startsWith('https')));
 
-    console.log("📌 필터링 후 이미지 수:", imgs?.length || 0);
-    if(imgs?.length) console.log("📸 첫 3개 이미지:", imgs.slice(0, 3));
+    console.log('📌 필터링 후 이미지 수:', imgs?.length || 0);
+    if(imgs?.length) console.log('📸 첫 3개 이미지:', imgs.slice(0,3));
 
-    // 대체 이미지(서버 실패 또는 API 키 미설정시 사용)
     const fallbackImages = [
       'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1600',
       'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=1600',
       'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=1600'
     ];
 
-    if(!imgs || imgs.length === 0){
-      console.warn('❌ No images from SerpAPI — using fallback images');
-      imgs = fallbackImages;
-    }
+    if(!imgs || imgs.length === 0) imgs = fallbackImages;
 
-    // 1~100 사이에서 무작위 선택 (요청한 결과 개수 내에서 랜덤)
-    let pick = imgs[Math.floor(Math.random() * Math.min(imgs.length, 100))];
-    console.log("🎯 선택된 이미지:", pick);
+    const pick = imgs[Math.floor(Math.random() * Math.min(imgs.length, 100))];
+    console.log('🎯 선택된 이미지:', pick);
 
-    let bg=document.querySelector(".dynamic-bg");
+    let bg = document.querySelector('.dynamic-bg');
     if(!bg){
-      bg=document.createElement("div");
-      bg.className="dynamic-bg";
+      bg = document.createElement('div');
+      bg.className = 'dynamic-bg';
       document.body.appendChild(bg);
-      console.log("✅ .dynamic-bg 요소 생성됨");
+      console.log('✅ .dynamic-bg 요소 생성됨');
     }
 
     bg.style.backgroundImage = `url("${pick}")`;
-    bg.style.opacity="0.65";
-    console.log("✅ 배경 이미지 설정됨, opacity: 0.65");
-    setTimeout(()=> {
-      bg.style.opacity="0.28";
-      console.log("✅ opacity 변경됨: 0.28");
+    bg.style.opacity = '0.65';
+    console.log('✅ 배경 이미지 설정됨, opacity: 0.65');
+    setTimeout(()=>{
+      bg.style.opacity = '0.28';
+      console.log('✅ opacity 변경됨: 0.28');
     }, 600);
 
-  }catch(e){
-    console.error("⚠ 이미지 로드 실패:",e);
+  } catch(err){
+    console.warn('🔁 프록시 호출 실패 또는 에러, Unsplash로 폴백:', err.message);
+    let bg = document.querySelector('.dynamic-bg');
+    if(!bg){
+      bg = document.createElement('div');
+      bg.className = 'dynamic-bg';
+      document.body.appendChild(bg);
+    }
+    bg.style.backgroundImage = `url("${unsplash}")`;
+    bg.style.opacity = '0.65';
+    setTimeout(()=> bg.style.opacity = '0.28', 600);
+    console.log('✅ Using Unsplash Source (fallback):', unsplash);
   }
 }
 
