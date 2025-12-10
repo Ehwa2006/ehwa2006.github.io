@@ -283,6 +283,8 @@ async function loadSerpBg(){
   const vercelUrl = "https://ehwa2006-github-io.vercel.app/api/game-images";
   const localProxyUrl = "http://localhost:3000/api/game-images";
   const timeoutMs = 2000;
+  // Debug: log which Vercel URL this script will call and script version
+  console.log('DEBUG scriptVersion:v3, vercelUrl=', vercelUrl);
   const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
 
   const urls = [vercelUrl, localProxyUrl];
