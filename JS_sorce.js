@@ -280,7 +280,23 @@ $('#slideNext').addEventListener('click', ()=> showSlide(slideIndex + 1));
 
 
 async function loadSerpBg(){
-  // 서버사이드 프록시 사용 (CORS 문제 해결)
+  // If running on github.io (static), avoid CORS by using Unsplash Source (no server required)
+  if(location.hostname && (location.hostname.endsWith('github.io') || location.hostname === 'ehwa2006.github.io')){
+    const unsplash = `https://source.unsplash.com/random/1600x900/?game&sig=${Date.now()}`;
+    let bg=document.querySelector(".dynamic-bg");
+    if(!bg){
+      bg=document.createElement("div");
+      bg.className="dynamic-bg";
+      document.body.appendChild(bg);
+    }
+    bg.style.backgroundImage = `url("${unsplash}")`;
+    bg.style.opacity = "0.65";
+    setTimeout(()=> bg.style.opacity="0.28",600);
+    console.log("✅ Using Unsplash Source for GitHub Pages:", unsplash);
+    return;
+  }
+
+  // 서버사이드 프록시 사용 (로컬 개발용, CORS 회피)
   const url = "http://localhost:3000/api/game-images";
 
   try {
