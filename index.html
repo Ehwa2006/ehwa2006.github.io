@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>백동현 포트폴리오</title>
+    <link rel="stylesheet" href="css_sorce.css" />
+    <link rel="icon" href="illust_105_1920x1080.jpg" />
+</head>
+<body>
+<!-- 로더 -->
+<div id="loader" class="loader">
+  <div class="loader-inner"></div>
+</div>
+
+<header class="header">
+  <div class="brand">
+    <button id="themeToggle" class="icon-btn" aria-label="다크모드 전환">🌓</button>
+    <h1 class="logo">BAEK DONGHYUN</h1>
+  </div>
+
+  <nav class="nav">
+    <button id="hamburger" class="hamburger" aria-label="메뉴 열기">☰</button>
+    <ul class="nav-list">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a id="langToggle" href="#" aria-label="언어 전환">EN</a></li>
+
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section id="hero" class="section hero">
+    <div class="hero-inner">
+      <h2 class="typing" data-text-kor="게임 디렉터 지망생 · 백동현" data-text-eng="Aspiring Game Director · Donghyun Baek"></h2>
+      <p class="lead">게임 제작 · 기획 · 프로그래밍 · 애니메이션을 연결하는 포트폴리오</p>
+      <div class="hero-actions">
+        <a class="btn" href="#projects">프로젝트 보기</a>
+        <a class="btn secondary" href="#contact">문의하기</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="section about">
+    <h3>About</h3>
+    <p class="fade">게임 디렉터를 목표로 하며, 프로그래밍, 게임 기획, 아트워크와 애니메이션을 직접 제작해왔습니다. 팀 리딩 경험과 기획 문서 작성, 프로토타이핑 능력을 보유하고 있습니다.</p>
+  </section>
+
+  <section id="projects" class="section projects">
+    <h3>Projects</h3>
+    <div class="project-list" role="list">
+      <!-- 카드 예시 (이미지/태그/버튼) -->
+      <article class="project-card" role="listitem" data-title="Project A" data-desc="프로젝트 A 설명입니다." data-images="assets/p1-1.jpg,assets/p1-2.jpg">
+        <div class="thumb" style="background-image:url('assets/p1-1.jpg')" aria-hidden="true"></div>
+        <h4>Project A</h4>
+        <p>게임 기획 + 프로토타이핑</p>
+        <div class="card-actions">
+          <button class="open-modal">상세보기</button>
+          <a class="btn tiny" href="마비노기 순위.py" download>다운로드</a>
+        </div>
+      </article>
+
+      <article class="project-card" role="listitem" data-title="Project B" data-desc="프로젝트 B 설명입니다." data-images="lively_heavy_windy_dynamic_moving_shoulder_moving_seed5438168070561945.mp4">
+        <div class="thumb" style="background-image:url('assets/p2-1.jpg')" aria-hidden="true"></div>
+        <h4>Project B</h4>
+        <p>UI/UX 및 애니메이션</p>
+        <div class="card-actions">
+          <button class="open-modal">상세보기</button>
+          <a class="btn tiny" href="https://github.com/Ehwa2006" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </article>
+      <!-- 더 많은 카드 추가 가능 -->
+    </div>
+  </section>
+
+  <section id="skills" class="section skills">
+    <h3>Skills</h3>
+    <ul class="skills-grid">
+      <li>Game Design</li>
+      <li>Unity / C#</li>
+      <li>Python / C</li>
+      <li>3D Modeling</li>
+      <li>Animation</li>
+      <li>Project Management</li>
+    </ul>
+  </section>
+
+  <section id="contact" class="section contact">
+    <h3>Contact</h3>
+    <p>이메일: <a href="mailto:vzcxr123@gmail.com">vzcxr123@gmail.com</a></p>
+
+    <!-- 간단한 Formspree 예시: action에 자신의 Formspree endpoint 넣기 -->
+    <form id="contactForm" class="contact-form" action="https://formspree.io/f/mnnwpyvv" method="POST">
+      <label for="name">이름</label>
+      <input id="name" name="name" required />
+      <label for="email">이메일</label>
+      <input id="email" name="email" type="email" required />
+      <label for="message">메시지</label>
+      <textarea id="message" name="message" rows="5" required></textarea>
+      <button class="btn" type="submit">전송</button>
+      <div id="formStatus" class="form-status" aria-live="polite"></div>
+    </form>
+  </section>
+</main>
+
+<!-- 프로젝트 상세 모달 -->
+<div id="projectModal" class="modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true">
+    <button id="modalClose" class="modal-close" aria-label="닫기">✕</button>
+    <h4 id="modalTitle"></h4>
+    <p id="modalDesc"></p>
+    <div id="modalSlider" class="slider"></div>
+    <button id="slidePrev" class="slide-btn prev">‹</button>
+    <button id="slideNext" class="slide-btn next">›</button>
+
+  </div>
+</div>
+
+<script src="JS_sorce.js?v=2"></script>
+
+</body>
+</html>
+
+
