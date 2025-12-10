@@ -280,67 +280,65 @@ $('#slideNext').addEventListener('click', ()=> showSlide(slideIndex + 1));
 
 
 async function loadSerpBg(){
-  const proxyUrl = "http://localhost:3000/api/game-images";
-  const unsplash = `https://source.unsplash.com/random/1600x900/?game&sig=${Date.now()}`;
-
-  // 짧은 타임아웃으로 로컬 프록시를 시도하고 실패하면 Unsplash로 폴백
+  const vercelUrl = "https://ehwa2006.vercel.app/api/game-images";
+  const localProxyUrl = "http://localhost:3000/api/game-images";
   const timeoutMs = 2000;
   const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
 
-  try {
-    const res = await Promise.race([fetch(proxyUrl), timeout(timeoutMs)]);
-    if(!res || !res.ok) throw new Error('proxy fetch failed');
+  const urls = [vercelUrl, localProxyUrl];
+  for (const url of urls) {
+    try {
+      const res = await Promise.race([fetch(url), timeout(timeoutMs)]);
+      if(!res || !res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+      console.log(`✅ 응답 수신: ${url}`);
+      return applyBackgroundImage(data);
+    } catch(err){
+      console.warn(`⚠️ ${url} 실패: ${err.message}`);
+      continue;
+    }
+  }
 
-    const data = await res.json();
-    console.log('✅ 프록시 응답 수신');
-    console.log('🔍 API 응답:', data);
+  console.warn('🔁 모든 프록시 실패, Unsplash로 폴백');
+  applyBackgroundImage(null);
+}
 
-    let imgs = data.images_results?.map(i => i.original || i.thumbnail || i.source || i.link)
+function applyBackgroundImage(data, unsplashUrl = null) {
+  let pick = unsplashUrl;
+
+  if(data && data.images_results){
+    let imgs = data.images_results
+      .map(i => i.original || i.thumbnail || i.source || i.link)
       .filter(u => u && (u.startsWith('http') || u.startsWith('https')));
 
-    console.log('📌 필터링 후 이미지 수:', imgs?.length || 0);
-    if(imgs?.length) console.log('📸 첫 3개 이미지:', imgs.slice(0,3));
-
-    const fallbackImages = [
-      'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1600',
-      'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=1600',
-      'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=1600'
-    ];
-
-    if(!imgs || imgs.length === 0) imgs = fallbackImages;
-
-    const pick = imgs[Math.floor(Math.random() * Math.min(imgs.length, 100))];
-    console.log('🎯 선택된 이미지:', pick);
-
-    let bg = document.querySelector('.dynamic-bg');
-    if(!bg){
-      bg = document.createElement('div');
-      bg.className = 'dynamic-bg';
-      document.body.appendChild(bg);
-      console.log('✅ .dynamic-bg 요소 생성됨');
+    console.log(`📌 필터링 후 이미지 수: ${imgs?.length || 0}`);
+    if(imgs?.length){
+      console.log(`📸 첫 3개 이미지:`, imgs.slice(0,3));
+      pick = imgs[Math.floor(Math.random() * Math.min(imgs.length, 100))];
+      console.log(`🎯 선택된 이미지:`, pick);
     }
-
-    bg.style.backgroundImage = `url("${pick}")`;
-    bg.style.opacity = '0.65';
-    console.log('✅ 배경 이미지 설정됨, opacity: 0.65');
-    setTimeout(()=>{
-      bg.style.opacity = '0.28';
-      console.log('✅ opacity 변경됨: 0.28');
-    }, 600);
-
-  } catch(err){
-    console.warn('🔁 프록시 호출 실패 또는 에러, Unsplash로 폴백:', err.message);
-    let bg = document.querySelector('.dynamic-bg');
-    if(!bg){
-      bg = document.createElement('div');
-      bg.className = 'dynamic-bg';
-      document.body.appendChild(bg);
-    }
-    bg.style.backgroundImage = `url("${unsplash}")`;
-    bg.style.opacity = '0.65';
-    setTimeout(()=> bg.style.opacity = '0.28', 600);
-    console.log('✅ Using Unsplash Source (fallback):', unsplash);
   }
+
+  if(!pick){
+    pick = `https://source.unsplash.com/random/1600x900/?game&sig=${Date.now()}`;
+    console.log(`✅ Unsplash 사용:`, pick);
+  }
+
+  let bg = document.querySelector('.dynamic-bg');
+  if(!bg){
+    bg = document.createElement('div');
+    bg.className = 'dynamic-bg';
+    document.body.appendChild(bg);
+    console.log('✅ .dynamic-bg 요소 생성됨');
+  }
+
+  bg.style.backgroundImage = `url("${pick}")`;
+  bg.style.opacity = '0.65';
+  console.log('✅ 배경 이미지 설정됨, opacity: 0.65');
+  setTimeout(()=>{
+    bg.style.opacity = '0.28';
+    console.log('✅ opacity 변경됨: 0.28');
+  }, 600);
 }
 
 window.addEventListener("load", loadSerpBg);
