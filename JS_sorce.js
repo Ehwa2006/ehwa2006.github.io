@@ -287,7 +287,9 @@ async function loadSerpBg(){
   console.log('DEBUG scriptVersion:v3, vercelUrl=', vercelUrl);
   const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
 
-  const urls = [vercelUrl, localProxyUrl];
+  // 개발 중 로컬에서 테스트하기 편하도록 로컬 프록시를 먼저 시도합니다.
+  // 프로덕션에서 배포를 사용할 때는 vercelUrl을 먼저 하도록 다시 변경하세요.
+  const urls = [localProxyUrl, vercelUrl];
   for (const url of urls) {
     try {
       const res = await Promise.race([fetch(url), timeout(timeoutMs)]);
