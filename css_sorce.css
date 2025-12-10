@@ -231,12 +231,13 @@ a:focus,button:focus,input:focus,textarea:focus{outline:3px solid rgba(0,198,255
 
 .dynamic-bg {
   position: fixed;
-  top:0; left:0;
-  width:100vw; height:100vh;
+  inset: 0;
+  z-index: 1;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.25;
-  z-index:-1;
-  transition: opacity .6s;
+  opacity: 0.28;
+  transition: opacity .6s ease;
+  pointer-events: none;
 }
+

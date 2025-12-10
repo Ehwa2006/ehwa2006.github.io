@@ -280,23 +280,38 @@ $('#slideNext').addEventListener('click', ()=> showSlide(slideIndex + 1));
 
 
 async function loadSerpBg(){
-  const KEY = "5a3d1fa38905880650b9c46f87a5a2fe0df13e7551b0e82a2b0d3f0566e25e45"; // 🔥 본인 키 입력
-  const q = "게임";
-  const url = `https://serpapi.com/search.json?q=${encodeURIComponent(q)}&tbm=isch&num=100&api_key=${KEY}`;
+  // 서버사이드 프록시 사용 (CORS 문제 해결)
+  const url = "http://localhost:3000/api/game-images";
 
   try {
     let res = await fetch(url);
     let data = await res.json();
 
-    let imgs = data.images_results?.map(i => 
-      i.original || i.thumbnail || i.source || i.link
-    ).filter(u => u && u.startsWith("https"));
+    console.log("🔍 API 응답:", data);
 
-    console.log("📌 필터링 후 이미지 수:", imgs.length);
+    let imgs = data.images_results?.map(i => {
+      const candidate = i.original || i.thumbnail;
+      if(candidate && candidate.startsWith("https")) return candidate;
+      return null;
+    }).filter(Boolean);
 
-    if(!imgs.length) return console.warn("❌ 사용 가능한 이미지 없음");
+    console.log("📌 필터링 후 이미지 수:", imgs?.length || 0);
+    if(imgs?.length) console.log("📸 첫 3개 이미지:", imgs.slice(0, 3));
 
-    let pick = imgs[Math.floor(Math.random()*imgs.length)];
+    // 대체 이미지(서버 실패 또는 API 키 미설정시 사용)
+    const fallbackImages = [
+      'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1600',
+      'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?w=1600',
+      'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=1600'
+    ];
+
+    if(!imgs || imgs.length === 0){
+      console.warn('❌ No images from SerpAPI — using fallback images');
+      imgs = fallbackImages;
+    }
+
+    // 1~100 사이에서 무작위 선택 (요청한 결과 개수 내에서 랜덤)
+    let pick = imgs[Math.floor(Math.random() * Math.min(imgs.length, 100))];
     console.log("🎯 선택된 이미지:", pick);
 
     let bg=document.querySelector(".dynamic-bg");
@@ -304,11 +319,16 @@ async function loadSerpBg(){
       bg=document.createElement("div");
       bg.className="dynamic-bg";
       document.body.appendChild(bg);
+      console.log("✅ .dynamic-bg 요소 생성됨");
     }
 
     bg.style.backgroundImage = `url("${pick}")`;
     bg.style.opacity="0.65";
-    setTimeout(()=> bg.style.opacity="0.28",600);
+    console.log("✅ 배경 이미지 설정됨, opacity: 0.65");
+    setTimeout(()=> {
+      bg.style.opacity="0.28";
+      console.log("✅ opacity 변경됨: 0.28");
+    }, 600);
 
   }catch(e){
     console.error("⚠ 이미지 로드 실패:",e);
