@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      width: 360px;
+      padding: 0;
+      margin: 0;
+      font-family: 'Malgun Gothic', 'Noto Sans KR', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+    }
+    .container {
+      padding: 22px 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 26px;
+      letter-spacing: 1px;
+    }
+    .subtitle {
+      margin: 0 0 18px 0;
+      font-size: 12px;
+      opacity: 0.65;
+    }
+
+    /* ── 조작법 ── */
+    .instructions {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      text-align: left;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .instructions h3 {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      color: #7ec8e3;
+    }
+    .key-guide {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .key-item {
+      background: rgba(0,0,0,0.30);
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .key-code {
+      font-weight: bold;
+      color: #ffea00;
+      font-size: 14px;
+    }
+
+    /* ── 노트 타입 설명 ── */
+    .note-types {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .note-item {
+      background: rgba(0,0,0,0.25);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .note-item .nt {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 1px;
+    }
+    .nt-normal { color: #00e5ff; }
+    .nt-hold   { color: #76ff03; }
+    .nt-double { color: #ff4081; }
+    .nt-keys   { color: #ffea00; }
+
+    .tips {
+      margin-top: 10px;
+      font-size: 11px;
+      opacity: 0.70;
+      line-height: 1.7;
+    }
+    .tips b { color: #ffea00; }
+
+    /* ── 버튼 ── */
+    button#start {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-bottom: 8px;
+    }
+    button#start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5);
+    }
+    button#start:active {
+      transform: translateY(0);
+    }
+    button#start:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── 상태 메시지 ── */
+    #status-msg {
+      font-size: 12px;
+      min-height: 20px;
+      color: #7ec8e3;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    /* ── 단축키 요약 ── */
+    .shortcut-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 2px;
+    }
+    .shortcut-item {
+      font-size: 11px;
+      opacity: 0.50;
+    }
+    .shortcut-item b {
+      color: rgba(255,255,255,0.75);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎵 Rhythm Game</h1>
+    <p class="subtitle">비트에 맞춰 노트를 터치하세요!</p>
+
+    <div class="instructions">
+      <h3>🎮 레인 키</h3>
+      <div class="key-guide">
+        <div class="key-item"><span class="key-code">D</span> — 레인 1</div>
+        <div class="key-item"><span class="key-code">F</span> — 레인 2</div>
+        <div class="key-item"><span class="key-code">J</span> — 레인 3</div>
+        <div class="key-item"><span class="key-code">K</span> — 레인 4</div>
+      </div>
+
+      <h3>🎵 노트 종류</h3>
+      <div class="note-types">
+        <div class="note-item">
+          <span class="nt nt-normal">일반 노트</span>
+          판정선에 맞춰 키를 한 번 누르세요
+        </div>
+        <div class="note-item">
+          <span class="nt nt-hold">롱 노트 (흰 줄)</span>
+          키를 꾹 누르고 유지하세요.<br>
+          조기 릴리즈 시 BREAK!
+        </div>
+        <div class="note-item">
+          <span class="nt nt-double">더블 노트</span>
+          두 레인 동시 입력!
+        </div>
+        <div class="note-item">
+          <span class="nt nt-keys">판정</span>
+          PERFECT → GOOD → BAD → MISS<br>
+          HP 0 = 게임오버
+        </div>
+      </div>
+
+      <div class="tips">
+        • YouTube / Spotify 탭의 오디오를 자동 감지합니다.<br>
+        • 비트 강도에 따라 <b>더블 노트</b>가 출현합니다.<br>
+        • 콤보 20↑ = ×2 &nbsp; 50↑ = ×3 &nbsp; 100↑ = ×4 배율
+      </div>
+    </div>
+
+    <div id="status-msg"></div>
+    <button id="start">🚀 게임 시작 / 재시작</button>
+
+    <div class="shortcut-row">
+      <span class="shortcut-item"><b>ESC</b> 숨기기</span>
+      <span class="shortcut-item"><b>SPACE</b> 게임 종료</span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
